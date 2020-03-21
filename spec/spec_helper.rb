@@ -1,4 +1,5 @@
 require "bundler/setup"
+require 'byebug'
 require "charge_set"
 
 RSpec.configure do |config|
