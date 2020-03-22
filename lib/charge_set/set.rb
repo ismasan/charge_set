@@ -17,19 +17,10 @@ module ChargeSet
 
     def add(path, **args)
       path = Array(path)
-      if previous_path = index[path.last]
-        remove_by_path(previous_path)
+      remove_by_path(index[path.last])
+      add_by_path(path, args).tap do |ch|
+        index[ch.guid] = path
       end
-      new_charge = path.each.with_index(1).reduce(root) do |ch, (segment, idx)|
-        if idx == path.size
-          ch.charge(args.merge(guid: segment))
-        else
-          ch.find(segment) || ch.charge(guid: segment, name: segment)
-        end
-      end
-
-      index[new_charge.guid] = path
-      new_charge
     end
 
     def move(guid, new_parent_path)
@@ -74,7 +65,17 @@ module ChargeSet
 
     attr_reader :root, :index
 
+    def add_by_path(path, args)
+      path.each.with_index(1).reduce(root) do |ch, (segment, idx)|
+        break ch.charge(args.merge(guid: segment)) if idx == path.size
+
+        ch.find(segment) || ch.charge(guid: segment, name: segment)
+      end
+    end
+
     def remove_by_path(path)
+      return nil unless path
+
       path = Array(path).clone
       tguid = path.pop
       if child = dig(*path)
