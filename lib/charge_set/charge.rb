@@ -12,6 +12,10 @@ module ChargeSet
       @metadata = metadata
     end
 
+    def to_args
+      { guid: guid, name: name, amount: amount, units: units, category: category, metadata: metadata }
+    end
+
     def charges
       index.values
     end
@@ -21,8 +25,8 @@ module ChargeSet
     end
 
     def dig(*guids)
-      guid = guids.shift
-      ch = find(guid)
+      guids = guids.clone
+      ch = find(guids.shift)
       return nil unless ch
       return ch unless guids.any?
       ch.dig(*guids)
@@ -42,6 +46,10 @@ module ChargeSet
       end
     end
 
+    def remove(guid)
+      index.delete guid
+    end
+
     def total
       net_total + charges.reduce(0) do |val, ch|
         val + ch.total
@@ -50,6 +58,10 @@ module ChargeSet
 
     def net_total
       amount * units
+    end
+
+    def inspect
+      %(<#{self.class}##{guid} name="#{name}" total:#{total} amount:#{amount} units:#{units} #{charges.size} charges>)
     end
 
     private
