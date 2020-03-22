@@ -10,6 +10,7 @@ module ChargeSet
       @units = units
       @category = category
       @metadata = metadata
+      freeze
     end
 
     def to_args
@@ -30,14 +31,6 @@ module ChargeSet
       return nil unless ch
       return ch unless guids.any?
       ch.dig(*guids)
-    end
-
-    def amend(name: nil, amount: nil, units: nil, category: nil)
-      @name = name if name
-      @amount = amount if amount
-      @units = units if units
-      @category = category if category
-      self
     end
 
     def charge(**args)
