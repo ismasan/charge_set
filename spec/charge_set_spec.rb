@@ -21,12 +21,17 @@ RSpec.describe ChargeSet::Set do
     it 'moves existing charge from previous place in tree' do
       set.add('a', name: 'Item 1', amount: 10, units: 2)
       set.add(['a', 'ab'], name: 'sub', amount: -5, units: 1)
+      set.add(['a', 'ab', 'c'], name: 'subsub', amount: 1)
+      expect(set.total).to eq 16
       # move sub-charge to a different branch
+      # sub-sub charges are deleted
       set.add(['b', 'ab'], name: 'sub', amount: -7, units: 1)
       expect(set.total).to eq 13
       expect(set.dig('a').total).to eq 20
       expect(set.dig('b').total).to eq -7
       expect(set.dig('b', 'ab').total).to eq -7
+      expect(set.dig('b', 'ab').net_total).to eq -7
+      expect(set.dig('b', 'ab', 'c')).to be nil
     end
 
     it 'is idempotent' do
