@@ -30,7 +30,7 @@ module ChargeSet
 
       ch = remove_by_path(previous_path)
       new_path = Array(new_parent_path) + [guid]
-      add(new_path, ch.to_args)
+      add(new_path, ch.to_args(true))
     end
 
     def remove(guid)

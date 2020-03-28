@@ -32,6 +32,7 @@ RSpec.describe ChargeSet::Set do
       expect(set.dig('b', 'ab').total).to eq -7
       expect(set.dig('b', 'ab').net_total).to eq -7
       expect(set.dig('b', 'ab', 'c')).to be nil
+      ascii set
     end
 
     it 'is idempotent' do
@@ -55,6 +56,15 @@ RSpec.describe ChargeSet::Set do
         expect(ch.guid).to eq 'ab'
         expect(ch.name).to eq 'sub'
       end
+    end
+
+    it 'preserves sub-charges' do
+      set.add('a', name: 'Item 1', amount: 10, units: 2)
+      set.add(['a', 'ab'], name: 'sub', amount: -5, units: 1)
+      set.add(['a', 'ab', 'c'], name: 'sub2', amount: 1, units: 1)
+      expect(set.dig('a', 'ab').total).to eq -4
+      set.move('ab', ['foo'])
+      expect(set.dig('foo', 'ab').total).to eq -4
     end
   end
 
@@ -103,6 +113,22 @@ RSpec.describe ChargeSet::Set do
 
       expect(set.dig('ch1', 'ch1.a', 'ch1.a.a')).to eq ch1aa
       expect(set.dig('ch1', 'ch1.a', 'ch1.a.a', 'foo')).to be nil
+      ascii set
     end
+  end
+
+  private
+
+  def ascii(set, depth = 0)
+    set.charges.each do |ch|
+      puts '| ' + ('-' * depth) + " #{ch.guid} amount:#{ch.amount} units:#{ch.units} net:#{ch.net_total} total:#{ch.total}"
+      ascii(ch, depth + 1)
+    end
+  end
+
+  def ascii_charge(ch, depth = 0)
+    <<-EOF.strip_heredoc
+    +-------------------------#{}+
+    EOF
   end
 end

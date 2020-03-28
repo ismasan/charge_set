@@ -2,8 +2,8 @@ module ChargeSet
   class Charge
     attr_reader :guid, :name, :amount, :units, :category, :metadata
 
-    def initialize(guid:, name:, amount: 0, units: 1, category: :pricing, metadata: {})
-      @index = {}
+    def initialize(guid:, name:, amount: 0, units: 1, category: :pricing, metadata: {}, index: {})
+      @index = index
       @guid = guid
       @name = name
       @amount = amount
@@ -13,8 +13,10 @@ module ChargeSet
       freeze
     end
 
-    def to_args
-      { guid: guid, name: name, amount: amount, units: units, category: category, metadata: metadata }
+    def to_args(include_charges = false)
+      { guid: guid, name: name, amount: amount, units: units, category: category, metadata: metadata }.tap do |h|
+        h[:index] = index if include_charges
+      end
     end
 
     def charges
