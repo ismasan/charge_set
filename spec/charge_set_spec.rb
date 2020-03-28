@@ -43,6 +43,16 @@ RSpec.describe ChargeSet::Set do
     end
   end
 
+  describe '#add_to' do
+    it 'adds sub charge by charge by guid' do
+      set.add(['a', 'b'], name: 'sub', amount: 5, units: 1)
+      set.add(['a', 'c'], name: 'sub', amount: 4, units: 1)
+      set.add_to('b', 'x', name: 'subsub', amount: 3)
+      expect(set.total).to eq 12
+      expect(set.dig('a', 'b').total).to eq 8
+    end
+  end
+
   describe '#move' do
     it 'moves charge from one branch to another, without amending data' do
       set.add('a', name: 'Item 1', amount: 10, units: 2)

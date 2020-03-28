@@ -23,6 +23,14 @@ module ChargeSet
       end
     end
 
+    # add sub charge to an existing charge, by guid
+    def add_to(parent_guid, child_path, **args)
+      parent_path = index[parent_guid]
+      return false unless parent_path
+
+      add(parent_path + Array(child_path), args)
+    end
+
     def move(guid, new_parent_path)
       guid = guid.last if guid.is_a?(Array)
       previous_path = index[guid]
