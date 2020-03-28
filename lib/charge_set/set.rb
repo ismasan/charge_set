@@ -5,7 +5,7 @@ module ChargeSet
   class Set
     extend Forwardable
 
-    def_delegators :root, :charge, :charges, :total, :dig
+    def_delegators :root, :charges, :total, :net_total, :dig
 
     def initialize
       @root = Charge.new(

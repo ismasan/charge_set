@@ -107,9 +107,9 @@ RSpec.describe ChargeSet::Set do
 
   describe '#dig' do
     it 'locates sub charge' do
-      ch1 = set.charge(guid: 'ch1', name: 'Item 1', amount: 10, units: 2)
-      ch1a = ch1.charge(guid: 'ch1.a', name: 'Sub', amount: 4)
-      ch1aa = ch1a.charge(guid: 'ch1.a.a', name: 'Sub 2', amount: 2)
+      set.add('ch1', name: 'ch1', amount: 10, units: 2)
+      set.add(['ch1', 'ch1.a'], name: 'sub', amount: 4)
+      ch1aa = set.add(['ch1', 'ch1.a', 'ch1.a.a'], name: 'sub 2', amount: 2)
 
       expect(set.dig('ch1', 'ch1.a', 'ch1.a.a')).to eq ch1aa
       expect(set.dig('ch1', 'ch1.a', 'ch1.a.a', 'foo')).to be nil
