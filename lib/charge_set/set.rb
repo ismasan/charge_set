@@ -69,9 +69,22 @@ module ChargeSet
       root.charges.sum &:units
     end
 
+    def to_ascii
+      ascii(self)
+    end
+
     private
 
     attr_reader :root, :index
+
+    def ascii(set, str = String.new, depth = 0)
+      set.charges.each do |ch|
+        str << "\r\n"
+        str << '| ' + ('-' * depth) + " #{ch.guid} amount:#{ch.amount} units:#{ch.units} net:#{ch.net_total} total:#{ch.total}"
+        ascii(ch, str, depth + 1)
+      end
+      str
+    end
 
     def add_by_path(path, args)
       path.each.with_index(1).reduce(root) do |ch, (segment, idx)|
