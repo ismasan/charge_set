@@ -43,8 +43,19 @@ RSpec.describe ChargeSet::Set do
     end
   end
 
+  describe '#upsert' do
+    it 'creates or updates charge without deleting existing sub charges' do
+      set.add('a', name: 'Item 1', amount: 10, units: 2)
+      set.add(['a', 'b'], name: 'sub', amount: 5, units: 1)
+      set.upsert('a', name: 'Item 1b', amount: 10, units: 1)
+
+      ascii set
+      expect(set.total).to eq 15
+    end
+  end
+
   describe '#add_to' do
-    it 'adds sub charge by charge by guid' do
+    it 'adds sub charge to charge by guid' do
       set.add(['a', 'b'], name: 'sub', amount: 5, units: 1)
       set.add(['a', 'c'], name: 'sub', amount: 4, units: 1)
       set.add_to('b', 'x', name: 'subsub', amount: 3)
@@ -101,6 +112,13 @@ RSpec.describe ChargeSet::Set do
         expect(ch.total).to eq 10
         expect(ch.name).to eq 'sub2'
       end
+    end
+
+    it 'preserves sub-charges' do
+      set.add(['a', 'ab'], name: 'sub', amount: 5, units: 1)
+      set.amend('a', units: 2, name: 'parent', amount: 10)
+      ascii set
+      expect(set.total).to eq 25
     end
   end
 

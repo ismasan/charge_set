@@ -5,7 +5,7 @@ module ChargeSet
   class Set
     extend Forwardable
 
-    def_delegators :root, :guid, :name, :amount, :units, :charges, :total, :net_total, :dig
+    def_delegators :root, :guid, :name, :amount, :units, :charges, :total, :net_total, :dig, :find
 
     def initialize
       @root = Charge.new(
@@ -18,8 +18,18 @@ module ChargeSet
     def add(path, **args)
       path = Array(path)
       remove_by_path(index[path.last])
-      add_by_path(path, args).tap do |ch|
-        index[ch.guid] = path
+      add_by_path(path, args)
+    end
+
+    def upsert(path, **args)
+      path = Array(path)
+      if old_path = index[path.last]
+        if old_path != path # we're also moving node
+          move(path.last, path[0...-1])
+        end
+        amend(path.last, args)
+      else
+        add(path, args)
       end
     end
 
@@ -55,7 +65,7 @@ module ChargeSet
       return nil unless path
 
       ch = dig(*path)
-      add(path, ch.to_args.merge(args))
+      add(path, ch.to_args(true).merge(args))
     end
 
     def find(guid)
@@ -78,7 +88,7 @@ module ChargeSet
     attr_reader :root, :index
 
     def ascii_lines(set)
-      lines = [%([#{set.guid}] amount:#{set.amount} units:#{set.units} total:#{set.total})]
+      lines = [%([#{set.guid}] #{set.name} amount:#{set.amount} units:#{set.units} total:#{set.total})]
       set.charges.each_with_index do |child, index|
         child_lines = ascii_lines(child)
         if index < set.charges.size - 1
@@ -98,16 +108,21 @@ module ChargeSet
 
     def ascii(set)
       ascii_lines(set).join("\n")
-      # line = %(#{' ' * depth}#{'└──' if depth > 1} [#{set.guid}] amount:#{set.amount} units:#{set.units} total:#{set.total}\r\n)
-      # line << set.charges.map{|ch| ascii(ch, depth + 2) }.join
-      # line
     end
 
     def add_by_path(path, args)
       path.each.with_index(1).reduce(root) do |ch, (segment, idx)|
-        break ch.charge(args.merge(guid: segment)) if idx == path.size
-
-        ch.find(segment) || ch.charge(guid: segment, name: segment)
+        if idx == path.size
+          ch = ch.charge(args.merge(guid: segment))
+          index[ch.guid] = path[0..idx]
+          break ch
+        end
+        child = ch.find(segment)
+        if !child
+          child = ch.charge(guid: segment, name: segment)
+          index[child.guid] = path[0...idx]
+        end
+        child
       end
     end
 
