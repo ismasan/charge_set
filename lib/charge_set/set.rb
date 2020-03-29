@@ -77,10 +77,30 @@ module ChargeSet
 
     attr_reader :root, :index
 
-    def ascii(set, depth = 0)
-      line = %(#{' ' * depth}#{'└──' if depth > 1} [#{set.guid}] amount:#{set.amount} units:#{set.units} total:#{set.total}\r\n)
-      line << set.charges.map{|ch| ascii(ch, depth + 2) }.join
-      line
+    def ascii_lines(set)
+      lines = [%([#{set.guid}] amount:#{set.amount} units:#{set.units} total:#{set.total})]
+      set.charges.each_with_index do |child, index|
+        child_lines = ascii_lines(child)
+        if index < set.charges.size - 1
+          child_lines.each_with_index do |line, idx|
+            prefix = (idx == 0) ? "├── " : "│   "
+            lines << "#{prefix}#{line}"
+          end
+        else
+          child_lines.each_with_index do |line, idx|
+            prefix = (idx == 0) ? "└── " : "    "
+            lines << "#{prefix}#{line}"
+          end
+        end
+      end
+      lines
+    end
+
+    def ascii(set)
+      ascii_lines(set).join("\n")
+      # line = %(#{' ' * depth}#{'└──' if depth > 1} [#{set.guid}] amount:#{set.amount} units:#{set.units} total:#{set.total}\r\n)
+      # line << set.charges.map{|ch| ascii(ch, depth + 2) }.join
+      # line
     end
 
     def add_by_path(path, args)
