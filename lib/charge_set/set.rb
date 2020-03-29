@@ -5,7 +5,7 @@ module ChargeSet
   class Set
     extend Forwardable
 
-    def_delegators :root, :charges, :total, :net_total, :dig
+    def_delegators :root, :guid, :name, :amount, :units, :charges, :total, :net_total, :dig
 
     def initialize
       @root = Charge.new(
@@ -77,13 +77,10 @@ module ChargeSet
 
     attr_reader :root, :index
 
-    def ascii(set, str = String.new, depth = 0)
-      set.charges.each do |ch|
-        str << "\r\n"
-        str << '| ' + ('-' * depth) + " #{ch.guid} amount:#{ch.amount} units:#{ch.units} net:#{ch.net_total} total:#{ch.total}"
-        ascii(ch, str, depth + 1)
-      end
-      str
+    def ascii(set, depth = 0)
+      line = %(#{' ' * depth}#{'└──' if depth > 1} [#{set.guid}] amount:#{set.amount} units:#{set.units} total:#{set.total}\r\n)
+      line << set.charges.map{|ch| ascii(ch, depth + 2) }.join
+      line
     end
 
     def add_by_path(path, args)

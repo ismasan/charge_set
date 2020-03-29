@@ -129,16 +129,7 @@ RSpec.describe ChargeSet::Set do
 
   private
 
-  def ascii(set, depth = 0)
-    set.charges.each do |ch|
-      puts '| ' + ('-' * depth) + " #{ch.guid} amount:#{ch.amount} units:#{ch.units} net:#{ch.net_total} total:#{ch.total}"
-      ascii(ch, depth + 1)
-    end
-  end
-
-  def ascii_charge(ch, depth = 0)
-    <<-EOF.strip_heredoc
-    +-------------------------#{}+
-    EOF
+  def ascii(set)
+    puts set.to_ascii
   end
 end
