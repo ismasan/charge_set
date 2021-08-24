@@ -132,7 +132,6 @@ module ChargeSet
       path = Array(path).clone
       tguid = path.pop
       if child = dig(*path)
-        index.delete(path.last)
         child.remove(tguid)
       end
     end
