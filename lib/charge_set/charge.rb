@@ -36,7 +36,7 @@ module ChargeSet
     end
 
     def charge(**args)
-      self.class.new(args).tap do |ch|
+      self.class.new(**args).tap do |ch|
         index[ch.guid] = ch
       end
     end

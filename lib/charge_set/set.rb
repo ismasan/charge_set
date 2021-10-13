@@ -29,7 +29,7 @@ module ChargeSet
         end
         amend(path.last, args)
       else
-        add(path, args)
+        add(path, **args)
       end
     end
 
@@ -38,7 +38,7 @@ module ChargeSet
       parent_path = index[parent_guid]
       return false unless parent_path
 
-      add(parent_path + Array(child_path), args)
+      add(parent_path + Array(child_path), **args)
     end
 
     def move(guid, new_parent_path)
@@ -48,7 +48,7 @@ module ChargeSet
 
       ch = remove_by_path(previous_path)
       new_path = Array(new_parent_path) + [guid]
-      add(new_path, ch.to_args(true))
+      add(new_path, **ch.to_args(true))
     end
 
     def remove(guid)
@@ -65,7 +65,7 @@ module ChargeSet
       return nil unless path
 
       ch = dig(*path)
-      add(path, ch.to_args(true).merge(args))
+      add(path, **ch.to_args(true).merge(args))
     end
 
     def find(guid)
@@ -113,7 +113,7 @@ module ChargeSet
     def add_by_path(path, args)
       path.each.with_index(1).reduce(root) do |ch, (segment, idx)|
         if idx == path.size
-          ch = ch.charge(args.merge(guid: segment))
+          ch = ch.charge(**args.merge(guid: segment))
           index[ch.guid] = path[0..idx]
           break ch
         end
