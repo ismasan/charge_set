@@ -13,26 +13,26 @@ RSpec.describe ChargeSet::Set do
     it 'adds charges in arbitrary dephts in tree' do
       set.add('a', name: 'Item 1', amount: 1000, units: 2)
       set.add(['a', 'b'], name: 'sub', amount: -500, units: 1)
-      expect(set.total.to_f).to eq 15.0
+      expect(set.total.to_f).to eq 1500.0
       ch1 = set.dig('a')
-      expect(ch1.total.to_f).to eq 15.0
+      expect(ch1.total.to_f).to eq 1500.0
       expect(ch1.charges.size).to eq 1
-      expect(set.dig('a', 'b').total.to_f).to eq -5.0
+      expect(set.dig('a', 'b').total.to_f).to eq -500.0
     end
 
     it 'moves existing charge from previous place in tree' do
       set.add('a', name: 'Item 1', amount: 1000, units: 2)
       set.add(['a', 'ab'], name: 'sub', amount: -500, units: 1)
       set.add(['a', 'ab', 'c'], name: 'subsub', amount: 100)
-      expect(set.total.format).to eq '$16.00'
+      expect(set.total.to_f).to eq 1600.0
       # move sub-charge to a different branch
       # sub-sub charges are deleted
       set.add(['b', 'ab'], name: 'sub', amount: -700, units: 1)
-      expect(set.total.to_f).to eq 13.0
-      expect(set.dig('a').total.to_f).to eq 20.0
-      expect(set.dig('b').total.to_f).to eq -7.0
-      expect(set.dig('b', 'ab').total.to_f).to eq -7.0
-      expect(set.dig('b', 'ab').net_total.to_f).to eq -7.0
+      expect(set.total.to_f).to eq 1300.0
+      expect(set.dig('a').total.to_f).to eq 2000.0
+      expect(set.dig('b').total.to_f).to eq -700.0
+      expect(set.dig('b', 'ab').total.to_f).to eq -700.0
+      expect(set.dig('b', 'ab').net_total.to_f).to eq -700.0
       expect(set.dig('b', 'ab', 'c')).to be nil
       ascii set
     end
@@ -41,7 +41,7 @@ RSpec.describe ChargeSet::Set do
       set.add('a', name: 'Item 1', amount: 1000, units: 2)
       set.add('a', name: 'Item 1', amount: 1000, units: 2)
 
-      expect(set.total.to_f).to eq 20.0
+      expect(set.total.to_f).to eq 2000.0
     end
   end
 
@@ -52,7 +52,7 @@ RSpec.describe ChargeSet::Set do
       set.upsert('a', name: 'Item 1b', amount: 1000, units: 1)
 
       ascii set
-      expect(set.total.to_f).to eq 15.0
+      expect(set.total.to_f).to eq 1500.0
     end
   end
 
@@ -61,8 +61,8 @@ RSpec.describe ChargeSet::Set do
       set.add(['a', 'b'], name: 'sub', amount: 500, units: 1)
       set.add(['a', 'c'], name: 'sub', amount: 400, units: 1)
       set.add_to('b', 'x', name: 'subsub', amount: 300)
-      expect(set.total.to_f).to eq 12.0
-      expect(set.dig('a', 'b').total.to_f).to eq 8.0
+      expect(set.total.to_f).to eq 1200.0
+      expect(set.dig('a', 'b').total.to_f).to eq 800.0
     end
   end
 
@@ -72,10 +72,10 @@ RSpec.describe ChargeSet::Set do
       set.add(['a', 'ab'], name: 'sub', amount: -500, units: 1)
       # move sub-charge to a different branch
       moved = set.move('ab', ['foo', 'bar'])
-      expect(moved.total.to_f).to eq -5.0
-      expect(set.total.to_f).to eq 15.00
+      expect(moved.total.to_f).to eq -500.0
+      expect(set.total.to_f).to eq 1500.0
       set.dig('foo', 'bar', 'ab').tap do |ch|
-        expect(ch.total.to_f).to eq -5.0
+        expect(ch.total.to_f).to eq -500.0
         expect(ch.guid).to eq 'ab'
         expect(ch.name).to eq 'sub'
       end
@@ -85,9 +85,9 @@ RSpec.describe ChargeSet::Set do
       set.add('a', name: 'Item 1', amount: 1000, units: 2)
       set.add(['a', 'ab'], name: 'sub', amount: -500, units: 1)
       set.add(['a', 'ab', 'c'], name: 'sub2', amount: 100, units: 1)
-      expect(set.dig('a', 'ab').total.to_f).to eq -4.0
+      expect(set.dig('a', 'ab').total.to_f).to eq -400.0
       set.move('ab', ['foo'])
-      expect(set.dig('foo', 'ab').total.to_f).to eq -4.0
+      expect(set.dig('foo', 'ab').total.to_f).to eq -400.0
     end
   end
 
@@ -97,8 +97,8 @@ RSpec.describe ChargeSet::Set do
       set.add(['a', 'ab'], name: 'sub', amount: -500, units: 1)
 
       removed = set.remove('ab')
-      expect(removed.total.to_f).to eq -5.0
-      expect(set.total.to_f).to eq 20.0
+      expect(removed.total.to_f).to eq -500.0
+      expect(set.total.to_f).to eq 2000.0
     end
 
     it 'returns nil if not found' do
@@ -111,7 +111,7 @@ RSpec.describe ChargeSet::Set do
       set.add(['a', 'ab'], name: 'sub', amount: 500, units: 1)
       set.amend('ab', units: 2, name: 'sub2')
       set.dig('a', 'ab').tap do |ch|
-        expect(ch.total.to_f).to eq 10.0
+        expect(ch.total.to_f).to eq 1000.0
         expect(ch.name).to eq 'sub2'
       end
     end
@@ -120,7 +120,7 @@ RSpec.describe ChargeSet::Set do
       set.add(['a', 'ab'], name: 'sub', amount: 500, units: 1)
       set.amend('a', units: 2, name: 'parent', amount: 1000)
       ascii set
-      expect(set.total.to_f).to eq 25.0
+      expect(set.total.to_f).to eq 2500.0
     end
   end
 

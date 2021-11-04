@@ -2,13 +2,15 @@
 
 module ChargeSet
   class Charge
+    ZERO = BigDecimal(0)
+
     attr_reader :guid, :name, :amount, :units, :category, :metadata
 
-    def initialize(guid:, name:, amount: Money.zero, units: 1, category: :pricing, metadata: {}, index: {})
+    def initialize(guid:, name:, amount: ZERO, units: 1, category: :pricing, metadata: {}, index: {})
       @index = index
       @guid = guid
       @name = name
-      @amount = amount.is_a?(Money) ? amount : Money.new(amount)
+      @amount = BigDecimal(amount)
       @units = units
       @category = category
       @metadata = metadata
@@ -48,7 +50,7 @@ module ChargeSet
     end
 
     def total
-      net_total + charges.reduce(Money.zero) do |val, ch|
+      net_total + charges.reduce(ZERO) do |val, ch|
         val + ch.total
       end
     end
