@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "charge_set/version"
 require 'money'
 

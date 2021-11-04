@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChargeSet
   class Charge
     attr_reader :guid, :name, :amount, :units, :category, :metadata
