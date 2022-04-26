@@ -4,21 +4,20 @@ module ChargeSet
   class Charge
     ZERO = BigDecimal(0)
 
-    attr_reader :guid, :name, :amount, :units, :category, :metadata
+    attr_reader :guid, :name, :amount, :units, :metadata
 
-    def initialize(guid:, name:, amount: ZERO, units: 1, category: :pricing, metadata: {}, index: {})
+    def initialize(guid:, name:, amount: ZERO, units: 1, metadata: {}, index: {})
       @index = index
       @guid = guid
       @name = name
       @amount = BigDecimal(amount)
       @units = units
-      @category = category
       @metadata = metadata
       freeze
     end
 
     def to_args(include_charges = false)
-      { guid: guid, name: name, amount: amount, units: units, category: category, metadata: metadata }.tap do |h|
+      { guid: guid, name: name, amount: amount, units: units, metadata: metadata }.tap do |h|
         h[:index] = index if include_charges
       end
     end
