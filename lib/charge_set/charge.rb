@@ -58,6 +58,14 @@ module ChargeSet
       amount * units
     end
 
+    def collect(&block)
+      list = []
+      list << self if block.call(self)
+      charges.each.with_object(list) do |ch, ret|
+        list.concat(ch.collect(&block))
+      end
+    end
+
     def inspect
       %(<#{self.class}##{guid} name="#{name}" total:#{total} amount:#{amount} units:#{units} #{charges.size} charges>)
     end

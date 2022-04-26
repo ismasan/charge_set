@@ -157,6 +157,18 @@ RSpec.describe ChargeSet::Set do
     end
   end
 
+  describe '#collect' do
+    it 'filters and collect charges, recursively' do
+      set.add('ch1', name: 'ch1', amount: 1000, units: 2)
+      set.add(['ch1', 'ch1.a'], name: 'Google Pixel 2', amount: 200, units: 1)
+      set.add(['ch1', 'ch1.b'], name: 'Apple iPhone 5', amount: 200, units: 1)
+      set.add(['ch1', 'ch1.c'], name: 'Apple iPhone 12', amount: 2000, units: 2)
+      subset = set.collect { |ch| ch.name =~ /Apple/ }
+      expect(subset.map(&:guid)).to eq(['ch1.b', 'ch1.c'])
+      expect(subset.sum(&:units)).to eq(3)
+    end
+  end
+
   private
 
   def ascii(set)
