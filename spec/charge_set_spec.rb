@@ -43,6 +43,16 @@ RSpec.describe ChargeSet::Set do
 
       expect(set.total.to_f).to eq 2000.0
     end
+
+    it 'adds arbitraty metadata object' do
+      meta = {}
+      set.add('a', name: 'Item 1', amount: 1000, units: 2, metadata: meta)
+      expect(set.dig('a').metadata).to eq(meta)
+      set.find('a').tap do |ch|
+        ch.metadata[:foo] = 'bar'
+      end
+      expect(set.dig('a').metadata[:foo]).to eq('bar')
+    end
   end
 
   describe '#upsert' do
